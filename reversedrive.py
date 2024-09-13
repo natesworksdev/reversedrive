@@ -41,9 +41,10 @@ def get_uuid(url):
     return uuid
 
 def get_filename(id):
-    apiUrl = "https://www.googleapis.com/drive/v2/files/{id}"
+    apiUrl = f"https://www.googleapis.com/drive/v2/files/{id}"
     params = {
-        "fields": "title"
+        "fields": "title",
+        "key": "AIzaSyC1eQ1xj69IdTMeii5r7brs3R90eck-m7k"
     }
 
     headers = {
@@ -54,6 +55,7 @@ def get_filename(id):
     metadata = metadata_response.json()
 
     filename = metadata.get("title", "downloaded_file")
+    debug_log(filename)
     return filename
 
 def download(id, uuid, filename):
@@ -72,5 +74,6 @@ def download(id, uuid, filename):
 
 if (__name__ == '__main__'):
     uuid = get_uuid(url)
+    get_filename(id)
     if auto:
         download(id, uuid, get_filename(id))
