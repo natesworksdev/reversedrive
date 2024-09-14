@@ -7,9 +7,9 @@ parser = argparse.ArgumentParser(
                     prog='Reversedrive',
                     description='Generates a direct download link for Google Drive.')
 
-parser.add_argument('id')
-parser.add_argument('-a', '--auto', action='store_true', help="after generating link automatically download the file")
-parser.add_argument('-v', '--verbose', action='store_true')
+parser.add_argument('id', help='file ID')
+parser.add_argument('-a', '--auto', action='store_true', help="after generating link automatically downloads the file")
+parser.add_argument('-v', '--verbose', action='store_true', help="enable verbose output for debugging")
 args = parser.parse_args()
 
 
@@ -19,10 +19,20 @@ verbose = args.verbose
 url = f"https://drive.google.com/uc?export=download&id={id}"
 
 def debug_log(text):
+    """Prints debug messages if verbose mode is enabled."""
     if verbose:
         print(f"\033[92m[DEBUG]\033[0m {text}")
 
 def get_uuid(url):
+    """
+    Retrieves the UUID from a Google Drive file page if a download warning is present.
+
+    Args:
+        url (str): The URL of the Google Drive file.
+    
+    Returns:
+        str: The UUID if found, otherwise None.
+    """
     uuid = None
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -41,6 +51,15 @@ def get_uuid(url):
     return uuid
 
 def get_filename(id):
+    """
+    Retrieves the filename of the Google Drive file using the Google Drive API.
+
+    Args:
+        id (str): The Google Drive file ID.
+    
+    Returns:
+        str: The name of the file.
+    """
     apiUrl = f"https://www.googleapis.com/drive/v2/files/{id}"
     params = {
         "fields": "title",
@@ -59,6 +78,14 @@ def get_filename(id):
     return filename
 
 def download(id, uuid, filename):
+    """
+    Downloads the file from Google Drive using the generated download link.
+
+    Args:
+        id (str): The Google Drive file ID.
+        uuid (str): The UUID required if a download warning is present.
+        filename (str): The name of the file to save locally.
+    """
     headers = {
         "Referer": "https://drive.google.com"
     }
