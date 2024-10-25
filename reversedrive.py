@@ -86,6 +86,8 @@ def download(id, uuid, filename):
         uuid (str): The UUID required if a download warning is present.
         filename (str): The name of the file to save locally.
     """
+
+    # Change the referer header to prevent redirecting to download confirmation
     headers = {
         "Referer": "https://drive.google.com"
     }
@@ -94,10 +96,11 @@ def download(id, uuid, filename):
     else:
         download_link = f"https://drive.google.com/uc?export=download&id={id}"
     debug_log(download_link)
-    file = requests.get(download_link, headers=headers, allow_redirects=True)
-
-    with open(filename, 'wb') as f:
-        f.write(file.content)
+    with requests.get(download_link, headers=headers, allow_redirects=True, stream=True) as file:
+        file.raise_for_status()
+        with open(filename, 'wb') as f:
+            for chunk in file.iter_content(chunk_size=8192):
+                f.write(chunk)
 
 if (__name__ == '__main__'):
     uuid = get_uuid(url)
